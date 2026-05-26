@@ -22,6 +22,8 @@ if not _HOST or not _PORT:
 REDIS_HOST: str = _HOST
 REDIS_PORT: int = int(_PORT)
 
+PRODUCT_CACHE_TTL_SECONDS = 5
+
 app = Flask(__name__)
 
 
@@ -55,6 +57,12 @@ DATABASE: dict[str, dict[str, Any]] = {
         "descricao": "Processador de última geração e placa de vídeo dedicada.",
         "preco": 7000.00,
     },
+    "4": {
+        "id": "4",
+        "nome": "Celular Android",
+        "descricao": "Processador de última geração.",
+        "preco": 3000.00,
+    },
 }
 
 
@@ -78,7 +86,7 @@ def get_product_from_with_cache(product_id: str) -> dict[str, Any] | None:
 
     if product_data:
         print("Dados no banco de dados encontrada salvando no cache")
-        r.set(cache_key, json.dumps(product_data))
+        r.set(cache_key, json.dumps(product_data), ex=PRODUCT_CACHE_TTL_SECONDS)
 
     return product_data
 
@@ -86,10 +94,10 @@ def get_product_from_with_cache(product_id: str) -> dict[str, Any] | None:
 @app.route("/products/<string:product_id>", methods=["GET"])
 def get_product(product_id: str):
     product_data = get_product_from_with_cache(product_id)
-    if not product_data:
-        product_data = get_product_from_db(product_id)
+
     if product_data:
         return jsonify(product_data)
+
     return jsonify({"message": "Produto não encontrado"}), 404
 
 
