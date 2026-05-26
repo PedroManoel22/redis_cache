@@ -3,14 +3,32 @@ Coletar
 
 """
 
+import os
+
 import redis
+from dotenv import load_dotenv
+
+load_dotenv()
+
+_HOST = os.getenv("REDIS_HOST")
+_PORT = os.getenv("REDIS_PORT")
+REDIS_USER = os.getenv("REDIS_USER")
+REDIS_PASS = os.getenv("REDIS_PASS")
+
+if not _HOST or not _PORT:
+    raise ValueError(
+        "ERRO: REDIS_HOST e REDIS_PORT precisam estar definidos no arquivo .env"
+    )
+
+REDIS_HOST: str = _HOST
+REDIS_PORT: int = int(_PORT)
 
 r = redis.Redis(
-    host="street-macrosleek-debt-10830.db.redis.io",
-    port=12096,
+    host=REDIS_HOST,
+    port=REDIS_PORT,
     decode_responses=True,
-    username="default",
-    password="kDNXskec3eXyFSU4PfOyEKRVDl7X5iLr",
+    username=REDIS_USER,
+    password=REDIS_PASS,
 )
 
 success = r.set("foo", "bar")
